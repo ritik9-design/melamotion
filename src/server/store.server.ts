@@ -2,7 +2,7 @@ import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { describeEnquiryMedia, ENQUIRY_MEDIA_TYPE, enquiryMediaType, extensionForEnquiryType } from "@/lib/enquiry-media";
 import { fileMatchesDeclaredType } from "@/lib/file-signatures";
-import { mergeSitePage, publicImageLink, savedVideoLink, sitePageSchema, type SitePage } from "@/lib/site-content";
+import { mergeSitePage, publicImageLink, publicPartnerUrl, savedVideoLink, sitePageSchema, type SitePage } from "@/lib/site-content";
 import { isSafeHttpsUrl } from "@/lib/site-urls";
 import type { Inquiry, InquiryAttachment, Project, ProjectInput, PublicFilm, StudioData, StudioSettings } from "@/lib/studio-types";
 
@@ -108,6 +108,7 @@ function invalidMedia(page: SitePage) {
   if (images.some((value) => value.trim() && !publicImageLink(value))) return "Image links need to be public https addresses.";
   const videos = [page.hero.video, page.hero.logoVideo, page.about.video, ...page.services.items.map((item) => item.video), ...page.films.items.map((item) => item.video)];
   if (videos.some((value) => value.trim() && !savedVideoLink(value))) return "Video links need to be a YouTube address or a public https video file, such as an .mp4 link.";
+  if (page.partners.items.some((item) => item.url.trim() && !publicPartnerUrl(item.url))) return "Company links need to be a public web address.";
   return "";
 }
 
@@ -128,6 +129,10 @@ function cleanPage(page: SitePage): SitePage {
     ...item,
     image: publicImageLink(item.image),
     video: savedVideoLink(item.video),
+  }));
+  next.partners.items = next.partners.items.map((item) => ({
+    ...item,
+    url: publicPartnerUrl(item.url),
   }));
   return sitePageSchema.parse(next);
 }

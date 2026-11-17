@@ -8,7 +8,7 @@ import dance from "@/assets/candlelit-wedding.jpg";
 import { Button } from "@/components/ui/button";
 import { describeEnquiryMedia, ENQUIRY_MEDIA_ACCEPT, ENQUIRY_MEDIA_MAX_FILES, ENQUIRY_MEDIA_TOO_MANY, ENQUIRY_MEDIA_TOTAL, ENQUIRY_MEDIA_TOTAL_BYTES, type EnquiryFileKind } from "@/lib/enquiry-media";
 import { inquirySchema } from "@/lib/inquiry-validation";
-import { defaultSitePage, publicVideoLink, safeColor, youtubeEmbed, youtubePoster, type SitePage } from "@/lib/site-content";
+import { defaultSitePage, partnerLooks, publicVideoLink, safeColor, youtubeEmbed, youtubePoster, type PartnerLook, type SitePage } from "@/lib/site-content";
 import { pathForSection, sectionHref, type PublicSection } from "@/lib/site-urls";
 import { submitInquiry } from "@/lib/studio.functions";
 
@@ -141,6 +141,8 @@ export function SitePage({ content, section = "home", editing = false, onChange 
         <a className="scroll-cue" href={sectionHref.about} onMouseDown={(event) => editing && event.preventDefault()} onClick={(event) => editing && event.preventDefault()}><span><Editable value={content.hero.scroll} editing={editing} onChange={(scroll) => patch({ ...content, hero: { ...content.hero, scroll } })} /></span><ArrowDown size={15} /></a>
         <span className="hero-index"><Editable value={content.hero.index} editing={editing} onChange={(index) => patch({ ...content, hero: { ...content.hero, index } })} /></span>
       </section>
+
+      <WorkedWithSection partners={content.partners} editing={editing} onChange={(partners) => patch({ ...content, partners })} />
 
       <section id="about" className="intro-section reveal">
         <p className="eyebrow section-kicker"><Editable value={content.about.kicker} editing={editing} onChange={(kicker) => patch({ ...content, about: { ...content.about, kicker } })} /></p>
@@ -294,6 +296,113 @@ function Editable({ value, editing, onChange }: { value: string; editing: boolea
       }}
       onBlur={(event) => onChange(event.currentTarget.innerText.replace(/\n+$/, ""))}
     />
+  );
+}
+
+const partnerClass: Record<PartnerLook, string> = {
+  stacked: "wedding-weekender",
+  tracked: "marked-grace",
+  sans: "filmed-by",
+  italic: "she-said-yes",
+};
+
+const partnerLookLabel: Record<PartnerLook, string> = {
+  stacked: "Two-line serif",
+  tracked: "Serif + spaced line",
+  sans: "Sans, spaced",
+  italic: "Serif + italic line",
+};
+
+function WorkedWithSection({
+  partners,
+  editing,
+  onChange,
+}: {
+  partners: SitePage["partners"];
+  editing: boolean;
+  onChange: (partners: SitePage["partners"]) => void;
+}) {
+  const items = editing ? partners.items : partners.items.filter((item) => item.name.trim());
+  if (!editing && items.length === 0) return null;
+
+  function update(id: string, change: Partial<SitePage["partners"]["items"][number]>) {
+    onChange({ ...partners, items: partners.items.map((item) => item.id === id ? { ...item, ...change } : item) });
+  }
+
+  function move(index: number, direction: -1 | 1) {
+    const next = index + direction;
+    if (next < 0 || next >= partners.items.length) return;
+    const copy = [...partners.items];
+    const [item] = copy.splice(index, 1);
+    if (!item) return;
+    copy.splice(next, 0, item);
+    onChange({ ...partners, items: copy });
+  }
+
+  function add() {
+    if (partners.items.length >= 40) return;
+    const style = partnerLooks[partners.items.length % partnerLooks.length] ?? "stacked";
+    onChange({
+      ...partners,
+      items: [...partners.items, { id: crypto.randomUUID(), name: "New company", subtitle: "", url: "", style }],
+    });
+  }
+
+  return (
+    <section className="worked-with-section reveal" aria-label={partners.heading || "Worked with"}>
+      <h2 className="worked-with-heading">
+        <Editable value={partners.heading} editing={editing} onChange={(heading) => onChange({ ...partners, heading })} />
+      </h2>
+      <div className="worked-with-container">
+        {items.map((item, index) => {
+          const subtitle = item.subtitle.trim();
+          const mark = (
+            <>
+              <div className="partner-name">
+                {editing ? <Editable value={item.name} editing onChange={(name) => update(item.id, { name })} /> : <Lines text={item.name} />}
+              </div>
+              {(subtitle || editing) && (
+                <div className="partner-subtitle">
+                  {editing ? <Editable value={item.subtitle} editing onChange={(nextSubtitle) => update(item.id, { subtitle: nextSubtitle })} /> : subtitle}
+                </div>
+              )}
+            </>
+          );
+          return (
+            <div className={`partner-item ${partnerClass[item.style]}`} key={item.id}>
+              <div className="partner-mark">
+                {!editing && item.url ? (
+                  <a className="partner-link" href={item.url} target="_blank" rel="noopener noreferrer">{mark}</a>
+                ) : (
+                  <div className="partner-link">{mark}</div>
+                )}
+              </div>
+              {editing && (
+                <div className="partner-tools">
+                  <label>
+                    Look
+                    <select aria-label={`Look for ${item.name || "company"}`} value={item.style} onChange={(event) => update(item.id, { style: event.target.value as PartnerLook })}>
+                      {partnerLooks.map((look) => <option key={look} value={look}>{partnerLookLabel[look]}</option>)}
+                    </select>
+                  </label>
+                  <label>
+                    Link
+                    <input aria-label={`Link for ${item.name || "company"}`} value={item.url} placeholder="https://their-site.com" onChange={(event) => update(item.id, { url: event.target.value })} />
+                  </label>
+                  <div className="partner-tool-row">
+                    <button type="button" onClick={() => move(index, -1)} disabled={index === 0}>Left</button>
+                    <button type="button" onClick={() => move(index, 1)} disabled={index === partners.items.length - 1}>Right</button>
+                    <button type="button" onClick={() => onChange({ ...partners, items: partners.items.filter((entry) => entry.id !== item.id) })}>Remove</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      {editing && partners.items.length < 40 && <button type="button" className="add-film" onClick={add}><Plus size={15} /> Add a company</button>}
+      {editing && <p className="partner-hint">Press Enter inside a name for a second line. A link opens in a new tab when someone clicks that company. Press Save when the row looks right.</p>}
+    </section>
   );
 }
 
@@ -666,7 +775,7 @@ export function EditorDock({
           <button type="button" className="edit-color-reset" onClick={() => onChange({ ...content, colors: defaultSitePage().colors })}>Default colours</button>
         </div>
       )}
-      <p>Click any words to rewrite them. Each picture has a Change button.</p>
+      <p>Click any words to rewrite them. Each picture has a Change button. Company names under the opening film can be added, restyled, and linked.</p>
       {notice && <p className="edit-notice">{notice}</p>}
       <div className="edit-dock-actions">
         <button type="button" onClick={() => setColorsOpen((open) => !open)}>{colorsOpen ? "Hide colours" : "Colours"}</button>

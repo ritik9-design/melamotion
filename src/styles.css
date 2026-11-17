@@ -336,9 +336,9 @@
 .add-film { display: flex; align-items: center; gap: 8px; margin: 22px auto 0; border-radius: 999px; }
 .is-editable { outline: 1px dashed color-mix(in srgb, var(--hero-paper) 70%, transparent); outline-offset: 4px; cursor: text; white-space: pre-wrap; border-radius: 2px; }
 .is-editable:hover, .is-editable:focus { background: color-mix(in srgb, var(--hero-paper) 18%, transparent); }
-.intro-section .is-editable, .services-section .is-editable, .quote-section .is-editable, .site-footer .is-editable { outline-color: color-mix(in srgb, var(--hero-ink) 45%, transparent); }
-.intro-section .is-editable:hover, .services-section .is-editable:hover, .quote-section .is-editable:hover, .site-footer .is-editable:hover,
-.intro-section .is-editable:focus, .services-section .is-editable:focus, .quote-section .is-editable:focus, .site-footer .is-editable:focus { background: color-mix(in srgb, var(--hero-ink) 8%, transparent); }
+.intro-section .is-editable, .services-section .is-editable, .quote-section .is-editable, .site-footer .is-editable, .worked-with-section .is-editable { outline-color: color-mix(in srgb, var(--hero-ink) 45%, transparent); }
+.intro-section .is-editable:hover, .services-section .is-editable:hover, .quote-section .is-editable:hover, .site-footer .is-editable:hover, .worked-with-section .is-editable:hover,
+.intro-section .is-editable:focus, .services-section .is-editable:focus, .quote-section .is-editable:focus, .site-footer .is-editable:focus, .worked-with-section .is-editable:focus { background: color-mix(in srgb, var(--hero-ink) 8%, transparent); }
 .site-editing { padding-bottom: 24px; overflow-anchor: none; }
 .is-editable { overflow-anchor: none; }
 .edit-dock { position: fixed; z-index: 80; right: 16px; bottom: 16px; width: min(300px, calc(100vw - 32px)); display: grid; gap: 12px; padding: 16px; background: color-mix(in srgb, var(--hero-night) 94%, black); color: var(--hero-paper); box-shadow: 0 18px 50px oklch(0 0 0 / 35%); }
@@ -387,4 +387,179 @@
   .contact-form input, .contact-form select, .contact-form textarea { font-size: 14px; }
   .media-drop { min-height: 132px; }
   .media-pick strong { font-size: 22px; }
+}
+
+.worked-with-section {
+  width: 100%;
+  padding: 55px 5% 62px;
+  background: #faf7f4;
+  box-sizing: border-box;
+  color: #111;
+}
+.worked-with-heading {
+  text-align: center;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 27px;
+  font-style: italic;
+  font-weight: 500;
+  color: #626344;
+  margin: 0 0 65px;
+}
+.worked-with-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  row-gap: 42px;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+.partner-item {
+  --partner-pad: 20px;
+  position: relative;
+  flex: 0 0 25%;
+  width: 25%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 var(--partner-pad);
+  box-sizing: border-box;
+  color: #111;
+}
+.partner-mark {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 85px;
+}
+.partner-link {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+a.partner-link { cursor: pointer; }
+a.partner-link:hover .partner-name,
+a.partner-link:focus-visible .partner-name { opacity: 0.62; }
+a.partner-link:focus-visible { outline: 1px solid #85836f; outline-offset: 8px; }
+.partner-mark::after {
+  content: "";
+  position: absolute;
+  right: calc(var(--partner-pad) * -1);
+  top: 50%;
+  height: 76px;
+  width: 1px;
+  background: #85836f;
+  transform: translateY(-50%);
+}
+.partner-item:nth-child(4n) .partner-mark::after,
+.partner-item:last-child .partner-mark::after { content: none; }
+.partner-name { font-family: "DM Serif Display", Georgia, serif; font-weight: 400; }
+.wedding-weekender .partner-name { font-size: clamp(27px, 3vw, 48px); line-height: 0.95; }
+.marked-grace .partner-name,
+.filmed-by .partner-name,
+.she-said-yes .partner-name { white-space: nowrap; }
+.marked-grace .partner-name { font-size: clamp(25px, 2.8vw, 43px); }
+.partner-subtitle {
+  font-family: "Montserrat", sans-serif;
+  font-size: 15px;
+  letter-spacing: 9px;
+  font-weight: 500;
+  margin-top: 7px;
+}
+.marked-grace .partner-subtitle { font-size: 12px; letter-spacing: clamp(4px, 0.65vw, 9px); }
+.filmed-by .partner-name {
+  font-family: "Montserrat", sans-serif;
+  font-size: clamp(20px, 2.2vw, 36px);
+  font-weight: 600;
+  letter-spacing: clamp(2px, 0.35vw, 5px);
+}
+.she-said-yes .partner-name { font-size: clamp(28px, 3vw, 48px); }
+.she-said-yes .partner-subtitle {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 25px;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 1px;
+  margin-top: 0;
+}
+.partner-subtitle .is-editable { display: inline-block; min-width: 9ch; min-height: 1.2em; }
+.partner-subtitle .is-editable:empty::before {
+  content: "Line under the name";
+  color: #9a9684;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 16px;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.partner-tools {
+  display: grid;
+  gap: 8px;
+  width: min(100%, 220px);
+  margin-top: 16px;
+  letter-spacing: 0;
+  font-family: var(--font-body);
+  font-style: normal;
+  font-weight: 400;
+  text-transform: none;
+}
+.partner-tools label { display: grid; gap: 4px; color: #626344; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; text-align: left; }
+.partner-tools input,
+.partner-tools select {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid #c9c4b6;
+  border-radius: 0;
+  padding: 7px 0;
+  background: transparent;
+  color: #111;
+  font: 13px/1.3 var(--font-body);
+  letter-spacing: 0;
+  text-transform: none;
+  outline: none;
+}
+.partner-tool-row { display: flex; justify-content: center; gap: 6px; }
+.partner-tool-row button {
+  border: 0;
+  background: #fff;
+  color: #2b241e;
+  cursor: pointer;
+  font: 12px/1 var(--font-body);
+  letter-spacing: 0;
+  text-transform: none;
+  padding: 8px 10px;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px oklch(0 0 0 / 12%);
+}
+.partner-tool-row button:disabled { opacity: 0.35; cursor: default; }
+.worked-with-section .add-film { margin-top: 36px; }
+.partner-hint { max-width: 520px; margin: 14px auto 0; color: #7d7b68; font-size: 13px; line-height: 1.5; text-align: center; }
+@media (max-width: 1100px) {
+  .worked-with-section { padding: 45px 5% 52px; }
+  .worked-with-heading { margin-bottom: 40px; }
+  .partner-item { flex-basis: 50%; width: 50%; }
+  .partner-item .partner-mark::after { content: none; }
+  .partner-item:nth-child(odd):not(:last-child) .partner-mark::after { content: ""; }
+}
+@media (max-width: 480px) {
+  .worked-with-section { padding: 35px 15px 42px; }
+  .worked-with-heading { font-size: 23px; margin-bottom: 35px; }
+  .worked-with-container { row-gap: 30px; }
+  .partner-item { --partner-pad: 10px; }
+  .partner-mark { min-height: 75px; }
+  .partner-mark::after { height: 64px; }
+  .wedding-weekender .partner-name,
+  .she-said-yes .partner-name { font-size: 22px; }
+  .marked-grace .partner-name { font-size: 16px; white-space: normal; }
+  .marked-grace .partner-subtitle { font-size: 8px; letter-spacing: 0.22em; }
+  .filmed-by .partner-name { font-size: 12px; letter-spacing: 0.08em; }
+  .she-said-yes .partner-subtitle { font-size: 16px; }
 }

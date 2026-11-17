@@ -4,6 +4,17 @@ import { isSafeHttpsUrl } from "@/lib/site-urls";
 const text = (max: number) => z.string().max(max);
 const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/);
 
+export const partnerLooks = ["stacked", "tracked", "sans", "italic"] as const;
+export type PartnerLook = (typeof partnerLooks)[number];
+
+const partnerItemSchema = z.object({
+  id: z.string().min(1).max(80),
+  name: text(120),
+  subtitle: text(80),
+  url: text(500),
+  style: z.enum(partnerLooks),
+});
+
 export const sitePageSchema = z.object({
   colors: z.object({
     paper: hex,
@@ -31,6 +42,10 @@ export const sitePageSchema = z.object({
     trialLabel: text(40),
     scroll: text(40),
     index: text(20),
+  }),
+  partners: z.object({
+    heading: text(80),
+    items: z.array(partnerItemSchema).max(40),
   }),
   about: z.object({
     kicker: text(120),
@@ -121,6 +136,15 @@ export function defaultSitePage(): SitePage {
       scroll: "Scroll to explore",
       index: "01 — 04",
     },
+    partners: {
+      heading: "(Worked With)",
+      items: [
+        { id: "partner-wedding-weekender", name: "Wedding\nWeekender", subtitle: "", url: "", style: "stacked" },
+        { id: "partner-marked-by-grace", name: "Marked by Grace", subtitle: "PRODUCTIONS", url: "", style: "tracked" },
+        { id: "partner-filmed-by", name: "FILMED BY __", subtitle: "", url: "", style: "sans" },
+        { id: "partner-she-said-yes", name: "SheSaidYes", subtitle: "Photography", url: "", style: "italic" },
+      ],
+    },
     about: {
       kicker: "An edit room built around your studio",
       heading: "You shoot the day.",
@@ -203,6 +227,11 @@ export function mergeSitePage(input: unknown): SitePage {
     colors: { ...base.colors, ...raw.colors },
     nav: { ...base.nav, ...raw.nav },
     hero: { ...base.hero, ...raw.hero },
+    partners: {
+      ...base.partners,
+      ...raw.partners,
+      items: Array.isArray(raw.partners?.items) ? normalizePartners(raw.partners.items) : base.partners.items,
+    },
     about: { ...base.about, ...raw.about },
     services: {
       ...base.services,
@@ -228,6 +257,25 @@ export function mergeSitePage(input: unknown): SitePage {
   };
   const parsed = sitePageSchema.safeParse(candidate);
   return parsed.success ? parsed.data : base;
+}
+
+function normalizePartners(items: unknown[]): SitePage["partners"]["items"] {
+  return items.slice(0, 40).map((item, index) => {
+    const raw = item && typeof item === "object" ? item as Record<string, unknown> : {};
+    const styleValue = raw["style"];
+    const idValue = raw["id"];
+    const nameValue = raw["name"];
+    const subtitleValue = raw["subtitle"];
+    const urlValue = raw["url"];
+    const style = partnerLooks.includes(styleValue as PartnerLook) ? styleValue as PartnerLook : partnerLooks[index % partnerLooks.length] ?? "stacked";
+    return {
+      id: typeof idValue === "string" && idValue.trim() ? idValue.trim().slice(0, 80) : `partner-${index + 1}`,
+      name: typeof nameValue === "string" ? nameValue.slice(0, 120) : "",
+      subtitle: typeof subtitleValue === "string" ? subtitleValue.slice(0, 80) : "",
+      url: typeof urlValue === "string" ? urlValue.slice(0, 500) : "",
+      style,
+    };
+  });
 }
 
 export function youtubeId(value: string) {
@@ -300,4 +348,12 @@ export function safeColor(value: string, fallback: string) {
 
 export function publicImageLink(value: string) {
   return isSafeHttpsUrl(value);
+}
+
+export function publicPartnerUrl(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  const upgraded = trimmed.replace(/^http:\/\//i, "https://");
+  const withProtocol = /^https:\/\//i.test(upgraded) ? upgraded : `https://${upgraded}`;
+  return isSafeHttpsUrl(withProtocol);
 }
